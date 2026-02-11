@@ -26,10 +26,15 @@ jobs:
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v2
 
+      - name: Configure Docker
+        run: gcloud auth configure-docker
+
       - name: Build and Push Image
         run: |
-          gcloud builds submit --tag gcr.io/wekit-mvp/wekit-app \
-            --build-arg VITE_GEMINI_API_KEY=${{ secrets.VITE_GEMINI_API_KEY }}
+          docker build \
+            --build-arg VITE_GEMINI_API_KEY=${{ secrets.VITE_GEMINI_API_KEY }} \
+            -t gcr.io/wekit-mvp/wekit-app .
+          docker push gcr.io/wekit-mvp/wekit-app
 
       - name: Deploy to Cloud Run
         run: |
