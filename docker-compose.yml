@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        # Pass the API key as a build argument.
+        # Ensure you have VITE_GEMINI_API_KEY set in your shell or .env file when running build
+        - VITE_GEMINI_API_KEY=${VITE_GEMINI_API_KEY}
+    ports:
+      - "3000:80"
+    restart: always
