@@ -9,26 +9,32 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+    permissions:
+      contents: read
+      id-token: write
 
-      - name: Authenticate to GCP
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
         with:
-          credentials_json: ${{ secrets.GCP_SA_KEY }}
+          workload_identity_provider: "projects/631940747483/locations/global/workloadIdentityPools/github-pool/providers/github-provider"
+          service_account: "github-deployer@wekit-mvp.iam.gserviceaccount.com"
 
-      - name: Setup gcloud
+      - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v2
 
       - name: Build and Push Image
         run: |
-          gcloud builds submit --tag gcr.io/wekit-mvp/wekit-app
+          gcloud builds submit --tag gcr.io/wekit-mvp/wekit-app \
+            --build-arg VITE_GEMINI_API_KEY=${{ secrets.VITE_GEMINI_API_KEY }}
 
       - name: Deploy to Cloud Run
         run: |
           gcloud run deploy wekit-app \
             --image gcr.io/wekit-mvp/wekit-app \
-            --region us-central1 \
+            --region asia-south1 \
             --platform managed \
             --allow-unauthenticated
